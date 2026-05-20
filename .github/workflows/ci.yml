@@ -1,8 +1,10 @@
+name: CI
+
 on:
   push:
     branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   test:
@@ -18,28 +20,29 @@ jobs:
         run: pytest
 
   build:
-    needs: test  
+    needs: test
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write 
-
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: Build imagen Docker
+        run: docker build -t mi-api .
 
-      - name: Iniciar sesión en GitHub Container Registry
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login a Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Construir y subir imagen
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build y push imagen
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true  
-          tags: |
-            ghcr.io/tobimed/tp-devops:latest
-            ghcr.io/tobimed/tp-devops:${{ github.sha }}
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops:latest
+          build-args: |
+            NEW_RELIC_LICENSE_KEY=${{ secrets.NEW_RELIC_LICENSE_KEY }}
