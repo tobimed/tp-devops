@@ -46,6 +46,9 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops:${{ github.sha }}
+          build-args: |
+            APP_VERSION=${{ github.sha }}
+            GIT_COMMIT=${{ github.sha }}
 
   deploy-render:
     needs: publish
