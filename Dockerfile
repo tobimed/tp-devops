@@ -1,8 +1,4 @@
 FROM python:3.12-slim AS builder
-ARG APP_VERSION=dev
-ARG GIT_COMMIT=unknown
-ENV APP_VERSION=$APP_VERSION
-ENV GIT_COMMIT=$GIT_COMMIT
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
@@ -23,5 +19,9 @@ EXPOSE 8000
 ENV NEW_RELIC_APP_NAME="TP DevOps API"
 ENV NEW_RELIC_LOG=stdout
 ENV NEW_RELIC_CONFIG_FILE=newrelic.ini
+ARG APP_VERSION=dev
+ARG GIT_COMMIT=unknown
+ENV APP_VERSION=$APP_VERSION
+ENV GIT_COMMIT=$GIT_COMMIT
 
 CMD ["newrelic-admin", "run-program", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
