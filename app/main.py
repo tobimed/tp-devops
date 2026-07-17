@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import os
 
 app = FastAPI()
 
@@ -13,3 +14,10 @@ def list_items():
 @app.post("/items")
 def create_item(item: dict):
     return {"id": 3, **item}
+    
+@app.get("/version")
+def get_version():
+    return {
+        "version": os.environ.get("APP_VERSION", "dev"),
+        "commit": os.environ.get("GIT_COMMIT", "unknown")
+    }
